@@ -1,0 +1,399 @@
+
+<html>
+    <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.0/dist/mindar-image-aframe.prod.js"></script>
+
+      <script>
+
+        function playVideo() {
+          var video = document.getElementById("card-video");
+          if (video.paused) {
+            video.play();
+            document.getElementById("playButton").innerHTML = "Pause";
+          } else {
+            video.pause();
+            document.getElementById("playButton").innerHTML = "Play";
+          }
+        }
+
+        function hideVideo() {
+          var video = document.getElementById("card-video");
+          var plane = document.getElementById("plane-video");
+
+          if (!video.paused) {
+            document.getElementById("playButton").style.display = "none";
+            video.pause();
+            plane.setAttribute("visible", false);
+            document.getElementById("hideButton").innerHTML = "Show";
+          } else {
+            document.getElementById("playButton").style.display = "block";
+            video.play();
+            plane.setAttribute("visible", true);
+            document.getElementById("hideButton").innerHTML = "Hide";
+          }
+        }
+
+        function hideImage() {
+          var plane = document.getElementById("plane-image");
+
+          if (plane.getAttribute("visible")) {
+            plane.setAttribute("visible", false);
+            document.getElementById("hideButton").innerHTML = "Show";
+          } else {
+            plane.setAttribute("visible", true);
+            document.getElementById("hideButton").innerHTML = "Hide";
+          }
+        }
+
+        var objectList = [ 
+          { "src": "videos/demo_video.mp4", "title": "GlassFood TFG Demo Video"},
+          { "src": "videos/Glassear _ The affordable 20$ Augmented Reality Headset!.mp4", "title": "What is Glassear?"},
+          { "src": "videos/yolotest.mkv", "title": "Yolo NN testing Video"},
+          { "src": "images/book_ui_better_cropped.png", "title": "Last UI Iteration"},
+          { "src": "images/anchor.png", "title": "How the anchor system works to spawn detected classes into the 3d space."},
+          { "src": "images/yolov5/F1_curve.png", "title": "F1 Curve of YOLO V5 trained with original 244x244 images"},
+          { "src": "images/yolov5/F1_curve.png", "title": "PR Curve of YOLO V5 trained with original 244x244 images"},
+          { "src": "images/yolov7/F1_curve.png", "title": "F1 Curve of YOLO V7 trained with original 244x244 images"},
+          { "src": "images/yolov7/F1_curve.png", "title": "PR Curve of YOLO V7 trained with original 244x244 images"},
+          { "src": "images/api.gif", "title": "Example of request to our 1 Million Recipe API with a simple query"},
+          { "src": "images/timeline.png" , "title": "Notion Gantt Chart View of the project tasks." }
+        ]
+
+        function getPdf() {
+          // open the pdf final_delivery_bruno_glassfood.pdf on local folder in a new tab
+          window.open("final_delivery_bruno_glassfood.pdf", "_blank");
+        }
+
+        console.log("objectList: " + objectList);
+
+        var currentIndex = 0;
+
+        function tryShowContent(object)
+        {
+          var title = document.getElementById("title");
+          var src = object.src;
+
+          console.log("src: " + src);
+
+          // src is the path to the object, that can be a video or an image
+          // get the extension of the file
+          var extension = src.split('.').pop();
+
+          // <img id="card" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.0/examples/image-tracking/assets/card-example/card.png" />
+          
+          // <video id="card" 
+          // width="160" height="90" autoplay loop="true"
+          // crossOrigin="anonymous">
+        
+          //   </video>
+
+          // if the extension is mp4, then it is a video
+          if (extension == "mp4" || extension == "mkv") 
+          {
+              // var video = document.getElementById("card");
+              var video = document.getElementById("card-video");
+              video.src = src;
+
+              //var video = document.getElementById("card");
+              var slider = document.getElementById("videoSlider");
+              
+              slider.oninput = function() {
+                video.currentTime = this.value;
+              }
+              video.ontimeupdate = function() {
+                slider.value = this.currentTime;
+              }
+
+              title.innerHTML = `Video #${currentIndex+1}:  ${object.title}`;
+              video.play();
+
+              var plane = document.getElementById("plane-video");
+              plane.setAttribute("visible", true);
+
+              var image = document.getElementById("plane-image");
+              image.setAttribute("visible", false);
+
+              // show the play button
+              document.getElementById("playButton").style.display = "block";
+
+              // show the hide button
+              document.getElementById("hideButton").onclick = function() {
+                hideVideo()
+              };
+
+              // show the slider
+              document.getElementById("videoSlider").style.display = "block";
+          }
+          else
+          {
+              // var image = document.getElementById("card");
+              var image = document.getElementById("card-image");
+              image.src = src;
+
+              // this.a_image = document.getElementById("plane-image");
+              // this.a_image.setAttribute("src", "#card-image");
+              // this.a_image.components.material.flushToDOM(true);
+
+              title.innerHTML = `Image #${currentIndex+1}:  ${object.title}`;
+
+              var plane = document.getElementById("plane-image");
+              plane.setAttribute("material", "src", src); // this is the way to change the image of the plane dynamically in A-Frame https://stackoverflow.com/a/66125887
+              plane.setAttribute("visible", true);
+
+              var video = document.getElementById("plane-video");
+              video.setAttribute("visible", false);
+
+              var video = document.getElementById("card-video");
+              video.pause();
+
+              // hide the play button
+              document.getElementById("playButton").style.display = "none";
+
+              // hide the hide button
+              document.getElementById("hideButton").onclick = function() {
+                 hideImage()
+              };
+
+              // hide the slider
+              document.getElementById("videoSlider").style.display = "none";
+
+
+          }
+
+         
+        }
+
+        function lastVideo() 
+        {
+          if (objectList.length > 0) {
+            
+            if (currentIndex > 0) {
+              currentIndex--;
+            } else {
+              currentIndex = objectList.length - 1;
+            }
+
+            tryShowContent(objectList[currentIndex]);
+          }
+        }
+
+        function nextVideo() {
+          if (objectList.length > 0) {
+
+            if (currentIndex < objectList.length - 1) {
+              currentIndex++;
+            } else {
+              currentIndex = 0;
+            }
+
+            tryShowContent(objectList[currentIndex]);
+          }
+        }
+
+        function startFirstVideo() {
+          if (objectList.length > 0) {
+            currentIndex = 0;
+            tryShowContent(objectList[currentIndex]);
+          }
+        }
+
+      </script>
+
+    <style>
+        #rowButtons
+        {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            -ms-transform: translate(-50%, -50%);
+
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            gap: 10px;
+
+            margin-bottom: 30px;
+        }
+
+        .buttonVideo {
+            /* put in the bottom of the screen */
+            /* position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            -ms-transform: translate(-50%, -50%); */
+
+
+            background-color: #555;
+            color: white;
+            font-size: 16px;
+            padding: 12px 24px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        /* .buttonVideo:hover {
+            background-color: black;
+        }
+
+        .buttonVideo:active {
+            background-color: #3e8e41;
+            box-shadow: 0 5px #666;
+            transform: translateY(4px);
+        } */  
+
+        /* set #playButton to green as it is the primary button */
+        #playButton {
+            background-color: #4CAF50;
+        }
+
+
+
+        #columnButtons
+        {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            -ms-transform: translate(-50%, -50%);
+
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #videoSlider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 25px;
+            background: #d3d3d3;
+            outline: none;
+            opacity: 0.7;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+            border-radius: 5px;
+        }
+
+        #topRow {
+            /* make the top row of buttons to be on the top of the screen */
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translate(-50%, 0%);
+            -ms-transform: translate(-50%, 0%);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+
+            /* margin-top: 30px; */
+
+        }
+
+        
+
+        #title {
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+        }
+
+    </style>
+
+    </head>
+    <body>
+      <a-scene mindar-image="imageTargetSrc: poster.mind;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+        <a-assets id="assets">
+          
+          <img id="card-image" crossOrigin="anonymous" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.0/examples/image-tracking/assets/card-example/card.png" />
+        
+          <video id="card-video" 
+          width="160" height="90" autoplay loop="true"
+          crossOrigin="anonymous">
+            </video> 
+
+        </a-assets>
+  
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+        <a-entity id="example-target" mindar-image-target="targetIndex: 0">
+          <a-plane  id="plane-video" src="#card-video" position="0 0 0" height="0.552" width="1" rotation="0 0 0" visible="false"></a-plane>
+          <a-image  id="plane-image" src="#card-image" position="0 0 0" height="1" width="1" rotation="0 0 0" visible="false"></a-image>
+        </a-entity>
+
+      </a-scene>
+
+      <!-- <script>
+        var video = document.getElementById("card");
+        video.play();
+      </script>  -->
+
+
+        <row id="topRow" style="display: none;">
+           <h3 id="title">What is Glassear?</h3>
+          <button class="buttonVideo" id="getPdf" onclick="getPdf()">Get Article</button>
+        </row>
+
+      <column id="columnButtons" style="display: none;">
+        <!-- add button on bototm screen to stop/play video-->
+        <row id="rowButtons">
+          <button class="buttonVideo" id="lastButton" onclick="lastVideo()"><<</button>
+          <button class="buttonVideo" id="playButton" onclick="playVideo()">Play</button>
+          <button class="buttonVideo" id="hideButton" onclick="hideVideo()">Hide</button>
+          <button class="buttonVideo" id="nextButton" onclick="nextVideo()">>></button>
+        </row>
+
+        <!-- add a slider to seek video-->
+        <input type="range" min="0" max="100" value="0" class="slider" id="videoSlider">
+      </column>
+
+      <script>
+        var hasStarted = false;
+
+        // detect target found
+        const exampleTarget = document.querySelector('#example-target');
+        exampleTarget.addEventListener("targetFound", event => {
+          if (!hasStarted) { // only start the video once the target is found for the first time
+            hasStarted = true;
+            startFirstVideo();
+          }
+          console.log("target found");
+
+          var video_plane = document.getElementById("plane-video");
+          if (video_plane.getAttribute("visible") == true) {
+            var card = document.getElementById("card-video");
+            card.play();
+          }
+        });
+
+        // detect target lost
+        exampleTarget.addEventListener("targetLost", event => {
+          console.log("target lost");
+
+          var video_plane = document.getElementById("plane-video");
+          if (video_plane.getAttribute("visible") == true) {
+            var card = document.getElementById("card-video");
+            card.pause();
+          }
+        });
+
+        const sceneEl = document.querySelector('a-scene');
+        sceneEl.addEventListener("arReady", (event) => {
+          console.log("MindAR is ready")
+          document.getElementById("columnButtons").style.display = "block";
+          document.getElementById("topRow").style.display = "block";
+        });
+      </script>
+
+    </body>
+  </html>
